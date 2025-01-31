@@ -83,8 +83,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
-        // Your web app's Firebase configuration
-    
+    </script>
 </head>
 <body>
     <header>
@@ -135,24 +134,34 @@
         else{
             console.log("firebase is working");
         }
+
+        firebase.auth().onAuthStateChanged(user => {
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                console.log("User authenticated:", user);
+            } else {
+                console.log("User not authenticated");
+            }
+        });
         // Get posts
         function getPosts() {
             database.ref('posts').on('value', (snapshot) => {
-                let posts = snapshot.val();
-                let output = '';
-                for(let post in posts) {
-                    output += `
-                        <div class="post">
-                            <h3>${posts[post].title}</h3>
-                            <p>${posts[post].content}</p>
-                            <p class="meta">Posted by: ${posts[post].user} on ${posts[post].date}</p>
-                        </div>
-                    `;
-                }
-                document.getElementById('posts').innerHTML = output;
+            let posts = snapshot.val();
+            let output = '';
+            for(let post in posts) {
+                output += `
+                <div class="post">
+                    <h3>${posts[post].title}</h3>
+                    <p>${posts[post].content}</p>
+                    <p class="meta">Posted by: ${posts[post].user} on ${posts[post].date}</p>
+                </div>
+                `;
+            }
+            document.getElementById('posts').innerHTML = output;
             });
         }
         getPosts();
+
         // Submit post
         document.getElementById('postForm').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -161,10 +170,10 @@
             let date = new Date().toLocaleString();
             let user = auth.currentUser ? auth.currentUser.displayName : 'Anonymous';
             let postData = {
-                title: title,
-                content: content,
-                date: date,
-                user: user
+            title: title,
+            content: content,
+            date: date,
+            user: user
             };
             let newPostKey = database.ref().child('posts').push().key;
             let updates = {};
@@ -172,8 +181,5 @@
             database.ref().update(updates);
             document.getElementById('postForm').reset();
         });
-
-
     </script>
 </body>
-</html>
