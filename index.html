@@ -125,7 +125,10 @@
     </div>
 
     <script>
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
         const db = firebase.firestore();
+        const database = firebase.database();
 
         // Function to render posts
         function renderPosts() {
