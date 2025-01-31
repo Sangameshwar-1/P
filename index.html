@@ -131,111 +131,50 @@
         const database = firebase.database();
 
         let userGroup = ""; // Store user's group
-        const messagesContainer = document.getElementById("messages");
-        const messageInput = document.getElementById("messageInput");
         if(!app){
             console.log("firebase is not working");
         }
         else{
             console.log("firebase is working");
         }
+        // Function to render posts
+        function renderPosts() {
+            db.collection("posts").orderBy("timestamp", "desc").get().then((querySnapshot) => {
+                const postsContainer = document.getElementById("posts");
+                postsContainer.innerHTML = "";
+                querySnapshot.forEach((doc) => {
+                    const post = doc.data();
+                    const postElement = document.createElement("div");
+                    postElement.classList.add("post");
+                    postElement.innerHTML = `
+                        <h3>${post.content}</h3>
+                        <p class="meta">${post.timestamp.toDate()}</p>
+                    `;
+                    postsContainer.appendChild(postElement);
+                });
+            });
+        }
+    
+        // post function
+        function post(content) {
+            db.collection("posts").add({
+                content: content,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                renderPosts();
+            });
+        }
 
-    //     auth.onAuthStateChanged((user) => {
-    //         if (user) {
-    //             const userId = user.uid;
-    //             const userRef = database.ref(`users/${userId}`);
+        document.getElementById("postForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const content = event.target.elements.content.value;
+            post(content);
+            event.target.reset();
+        });
 
-    //             userRef.once("value").then((snapshot) => {
-    //                 const userData = snapshot.val();
-    //                 if (userData) {
-    //                     const userName = user.displayName || "Anonymous";
-    //                     userGroup = userData.group;
-
-    //                     document.getElementById("userName").innerText = `Username: ${userName}`;
-    //                     document.getElementById("userGroup").innerText = `Group: ${userGroup}`;
-
-    //                     loadGroupMessages(userGroup);
-    //                 } else {
-    //                     console.error("User data not found.");
-    //                 }
-    //             }).catch((error) => {
-    //                 console.error("Error fetching user data:", error);
-    //             });
-    //         } else {
-    //             window.location.href = "index.html";
-    //         }
-    //     });
-
-    //     function loadGroupMessages(group) {
-    //         messagesContainer.innerHTML = ''; // Clear existing messages
-    //         const groupMessagesRef = database.ref(`messages/${group}`);
-    //         groupMessagesRef.off(); // Remove any existing listeners to avoid duplicates
-    //         groupMessagesRef.on("child_added", (snapshot) => {
-    //             const messageData = snapshot.val();
-    //             const messageId = snapshot.key;
-    //             const currentUser = auth.currentUser ? auth.currentUser.uid : "anonymous";
-    //             const messageElement = document.createElement("div");
-    //             messageElement.classList.add("message");
-    //             messageElement.innerHTML = `
-    //                 <strong>${messageData.username}:</strong> ${messageData.message} 
-    //                 <small>${messageData.timestamp}</small>
-    //                 ${messageData.userId === currentUser ? `<button onclick="deleteMessage('${messageId}')">Del</button>` : ''}`;
-    //             messagesContainer.appendChild(messageElement);
-    //             messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to latest message
-    //             database.ref(`messages/${userGroup}`).push({
-    //                 userId,
-    //                 username,
-    //                 message,
-    //                 timestamp
-    //             }).then(() => {
-    //                 messageInput.value = ''; // Clear the input field
-    //             }).catch((error) => {
-    //                 console.error("Error sending message:", error);
-    //                 });
-    //             });
-    //     }
-        
-
-    //     function sendMessage() {
-    //         const message = messageInput.value.trim();
-    //         if (message && userGroup) {
-    //             const timestamp = new Date().toISOString();
-    //             const userId = auth.currentUser ? auth.currentUser.uid : "anonymous";
-    //             const username = auth.currentUser ? auth.currentUser.displayName || "Anonymous" : "Anonymous";
-
-    //         database.ref(`messages/${userGroup}`).push({
-    //             userId,
-    //             username,
-    //             message,
-    //             timestamp
-    //         }).then(() => {
-    //             messageInput.value = ''; // Clear the input field
-    //         }).catch((error) => {
-    //             console.error("Error sending message:", error);
-    //         });
-    //     }
-    // }
-
-    // </script>
-    // <script>
-    //     // Load posts on page load
-    //     window.onload = renderPosts;
-
-    // // Handle form submission
-    // document.getElementById("postForm").addEventListener("submit", (e) => {
-    //     e.preventDefault();
-    //     const content = e.target.content.value;
-    //     const post = {
-    //         title: "New Post",
-    //         author: "Anonymous",
-    //         content: content,
-    //         timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    //     };
-    //     db.collection("posts").add(post).then(() => {
-    //         e.target.reset();
-    //         renderPosts();
-    //     });
-    // });
+        document.addEventListener("DOMContentLoaded", function() {
+            renderPosts();
+        });
     </script>
 </body>
 </html>
