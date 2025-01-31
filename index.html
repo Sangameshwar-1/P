@@ -80,13 +80,11 @@
         }
     </style>
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
         // Your web app's Firebase configuration
-    </script>
+    
 </head>
 <body>
     <header>
@@ -125,9 +123,8 @@
         appId: "1:926378767902:web:21591c4e5d77c90c9ca00f",
         measurementId: "G-HTGC1SJYH6"
          };
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+         const app = firebase.initializeApp(firebaseConfig);
+         const auth = firebase.auth();
         const database = firebase.database();
 
         let userGroup = ""; // Store user's group
