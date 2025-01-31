@@ -4,85 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Discussion Forum</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAHt06CtReHyQRip-QqEGILFjOWH5cI98c",
+            authDomain: "blood-7b054.firebaseapp.com",
+            databaseURL: "https://blood-7b054-default-rtdb.firebaseio.com",
+            projectId: "blood-7b054",
+            storageBucket: "blood-7b054.firebasestorage.app",
+            messagingSenderId: "926378767902",
+            appId: "1:926378767902:web:21591c4e5d77c90c9ca00f",
+            measurementId: "G-HTGC1SJYH6"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        let userGroup = ""; // Store user's group
+        if(!app){
+            console.log("firebase is not working");
         }
-        .container {
-            width: 80%;
-            margin: auto;
-            overflow: hidden;
+        else{
+            console.log("firebase is working");
         }
-        header {
-            background: #333;
-            color: #fff;
-            padding-top: 30px;
-            min-height: 70px;
-            border-bottom: #77aaff 3px solid;
+
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                console.log("User authenticated:", user);
+            } else {
+                console.log("User not authenticated");
+            }
+        });
+
+        // Get posts
+        function getPosts() {
+            database.ref('posts').on('value', (snapshot) => {
+                let posts = snapshot.val();
+                let output = '';
+                for(let post in posts) {
+                    output += `
+                    <div class="post">
+                        <h3>${posts[post].title}</h3>
+                        <p>${posts[post].content}</p>
+                        <p class="meta">Posted by: ${posts[post].user} on ${posts[post].date}</p>
+                    </div>
+                    `;
+                }
+                document.getElementById('posts').innerHTML = output;
+            });
         }
-        header a {
-            color: #fff;
-            text-decoration: none;
-            text-transform: uppercase;
-            font-size: 16px;
-        }
-        header ul {
-            padding: 0;
-            list-style: none;
-        }
-        header li {
-            float: left;
-            display: inline;
-            padding: 0 20px 0 20px;
-        }
-        .main {
-            padding: 20px;
-            background: #fff;
-            margin-top: 20px;
-        }
-        .main h2 {
-            color: #333;
-        }
-        .post {
-            border-bottom: 1px #ccc solid;
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-        }
-        .post h3 {
-            margin: 0;
-            padding: 0;
-        }
-        .post p {
-            margin: 5px 0;
-        }
-        .post .meta {
-            color: #777;
-            font-size: 12px;
-        }
-        .new-post {
-            margin-top: 20px;
-        }
-        .new-post textarea {
-            width: 100%;
-            height: 100px;
-        }
-        .new-post input[type="submit"] {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            background: #333;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-        }
-    </style>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth-compat.js"></script>
+        getPosts();
+
+        // Submit post
+        document.getElementById('postForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            let title = document.getElementsByName('title')[0].value;
+            let content = document.getElementsByName('content')[0].value;
+            let date = new Date().toLocaleString();
+            let user = auth.currentUser ? auth.currentUser.displayName : 'Anonymous';
+            let postData = {
+                title: title,
+                content: content,
+                date: date,
+                user: user
+            };
+            let newPostKey = database.ref().child('posts').push().key;
+            let updates = {};
+            updates['/posts/' + newPostKey] = postData;
+            database.ref().update(updates);
+            document.getElementById('postForm').reset();
+        });
     </script>
 </head>
 <body>
@@ -112,75 +108,5 @@
             </div>
         </div>
     </div>
-    <script>
-        const firebaseConfig = {
-        apiKey: "AIzaSyAHt06CtReHyQRip-QqEGILFjOWH5cI98c",
-        authDomain: "blood-7b054.firebaseapp.com",
-        databaseURL: "https://blood-7b054-default-rtdb.firebaseio.com",
-        projectId: "blood-7b054",
-        storageBucket: "blood-7b054.appspot.com",
-        messagingSenderId: "926378767902",
-        appId: "1:926378767902:web:21591c4e5d77c90c9ca00f",
-        measurementId: "G-HTGC1SJYH6"
-         };
-         const app = firebase.initializeApp(firebaseConfig);
-         const auth = firebase.auth();
-        const database = firebase.database();
-
-        let userGroup = ""; // Store user's group
-        if(!app){
-            console.log("firebase is not working");
-        }
-        else{
-            console.log("firebase is working");
-        }
-
-        firebase.auth().onAuthStateChanged(user => {
-        firebase.auth().onAuthStateChanged(user => {
-            if (user) {
-                console.log("User authenticated:", user);
-            } else {
-                console.log("User not authenticated");
-            }
-        });
-        // Get posts
-        function getPosts() {
-            database.ref('posts').on('value', (snapshot) => {
-            let posts = snapshot.val();
-            let output = '';
-            for(let post in posts) {
-                output += `
-                <div class="post">
-                    <h3>${posts[post].title}</h3>
-                    <p>${posts[post].content}</p>
-                    <p class="meta">Posted by: ${posts[post].user} on ${posts[post].date}</p>
-                </div>
-                `;
-            }
-            document.getElementById('posts').innerHTML = output;
-            });
-        }
-        getPosts();
-
-        // Submit post
-        document.getElementById('postForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            let title = document.getElementsByName('title')[0].value;
-            let content = document.getElementsByName('content')[0].value;
-            let date = new Date().toLocaleString();
-            let user = auth.currentUser ? auth.currentUser.displayName : 'Anonymous';
-            let postData = {
-            title: title,
-            content: content,
-            date: date,
-            user: user
-            };
-            let newPostKey = database.ref().child('posts').push().key;
-            let updates = {};
-            updates['/posts/' + newPostKey] = postData;
-            database.ref().update(updates);
-            document.getElementById('postForm').reset();
-        });
-    </script>
 </body>
 </html>
