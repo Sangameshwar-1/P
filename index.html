@@ -126,7 +126,6 @@
          const app = firebase.initializeApp(firebaseConfig);
          const auth = firebase.auth();
         const database = firebase.database();
-        const db = firebase.firestore();
 
         let userGroup = ""; // Store user's group
         if(!app){
@@ -135,44 +134,45 @@
         else{
             console.log("firebase is working");
         }
-        // Function to render posts
-        function renderPosts() {
-            db.collection("posts").orderBy("timestamp", "desc").get().then((querySnapshot) => {
-                const postsContainer = document.getElementById("posts");
-                postsContainer.innerHTML = "";
-                querySnapshot.forEach((doc) => {
-                    const post = doc.data();
-                    const postElement = document.createElement("div");
-                    postElement.classList.add("post");
-                    postElement.innerHTML = `
-                        <h3>${post.content}</h3>
-                        <p class="meta">${post.timestamp.toDate()}</p>
+        // Get posts
+        function getPosts() {
+            database.ref('posts').on('value', (snapshot) => {
+                let posts = snapshot.val();
+                let output = '';
+                for(let post in posts) {
+                    output += `
+                        <div class="post">
+                            <h3>${posts[post].title}</h3>
+                            <p>${posts[post].content}</p>
+                            <p class="meta">Posted by: ${posts[post].user} on ${posts[post].date}</p>
+                        </div>
                     `;
-                    postsContainer.appendChild(postElement);
-                });
+                }
+                document.getElementById('posts').innerHTML = output;
             });
         }
-    
-        // post function
-        function post(content) {
-            db.collection("posts").add({
+        getPosts();
+        // Submit post
+        document.getElementById('postForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            let title = document.getElementsByName('title')[0].value;
+            let content = document.getElementsByName('content')[0].value;
+            let date = new Date().toLocaleString();
+            let user = auth.currentUser.displayName;
+            let postData = {
+                title: title,
                 content: content,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                renderPosts();
-            });
-        }
-
-        document.getElementById("postForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            const content = event.target.elements.content.value;
-            post(content);
-            event.target.reset();
+                date: date,
+                user: user
+            };
+            let newPostKey = database.ref().child('posts').push().key;
+            let updates = {};
+            updates['/posts/' + newPostKey] = postData;
+            database.ref().update(updates);
+            document.getElementById('postForm').reset();
         });
+        
 
-        document.addEventListener("DOMContentLoaded", function() {
-            renderPosts();
-        });
     </script>
 </body>
 </html>
