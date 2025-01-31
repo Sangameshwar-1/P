@@ -82,10 +82,24 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCXF-_z9OMQmDq_t0cVZbSRqxg4tADviZs8",
+            authDomain: "test-9576c.firebaseapp.com",
+            projectId: "test-9576c",
+            storageBucket: "test-9576c.appspot.com",
+            messagingSenderId: "499472744741",
+            appId: "1:499472744741:web:26fded0ee2a2ffbd56097a"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
 </head>
 <body>
     <header>
-        <div class="container"></div>
+        <div class="container">
             <h1>Discussion Forum</h1>
             <nav>
                 <ul>
@@ -111,19 +125,6 @@
     </div>
 
     <script>
-        //C:\Users\SANGAMESHWAR\OneDrive - International Institute of Information Technology\Desktop\vs\p1\disscussion\dis.html
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCXF-_z9OMQmDq_t0cVZbSRqxg4tADviZs8",
-            authDomain: "test-9576c.firebaseapp.com",
-            projectId: "test-9576c",
-            storageBucket: "test-9576c.appspot.com",
-            messagingSenderId: "499472744741",
-            appId: "1:499472744741:web:26fded0ee2a2ffbd56097a"
-        };
-
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         // Function to render posts
@@ -137,7 +138,6 @@
                     postElement.classList.add("post");
                     postElement.innerHTML = `
                         <h3>${post.title}</h3>
-                        <p class="meta">Posted by ${post.author} on ${new Date(post.timestamp.toDate()).toLocaleString()}</p>
                         <p>${post.content}</p>
                     `;
                     postsContainer.appendChild(postElement);
