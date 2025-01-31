@@ -106,6 +106,7 @@
             <div class="new-post">
                 <h2>Create a New Post</h2>
                 <form id="postForm">
+                    <input type="text" name="title" placeholder="Title">
                     <textarea name="content" placeholder="Write your post here..."></textarea>
                     <input type="submit" value="Submit">
                 </form>
@@ -171,7 +172,7 @@
             database.ref().update(updates);
             document.getElementById('postForm').reset();
         });
-        
+
 
     </script>
 </body>
