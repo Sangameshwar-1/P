@@ -126,6 +126,7 @@
          const app = firebase.initializeApp(firebaseConfig);
          const auth = firebase.auth();
         const database = firebase.database();
+        const db = firebase.firestore();
 
         let userGroup = ""; // Store user's group
         if(!app){
