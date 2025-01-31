@@ -38,79 +38,73 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
   document.addEventListener("DOMContentLoaded", function() {
-            // Your web app's Firebase configuration
-           // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-                const firebaseConfig = {
-                apiKey: "AIzaSyD23-6Ms6bd4ePn80p1sYUvV8RalfTPEcE",
-                authDomain: "test-9576c.firebaseapp.com",
-                databaseURL: "https://test-9576c-default-rtdb.firebaseio.com",
-                projectId: "test-9576c",
-                storageBucket: "test-9576c.firebasestorage.app",
-                messagingSenderId: "200192472983",
-                appId: "1:200192472983:web:2a3c6b7b434068c48036d2",
-                measurementId: "G-PW6GP9SLDG"
-                };
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyD23-6Ms6bd4ePn80p1sYUvV8RalfTPEcE",
+        authDomain: "test-9576c.firebaseapp.com",
+        databaseURL: "https://test-9576c-default-rtdb.firebaseio.com",
+        projectId: "test-9576c",
+        storageBucket: "test-9576c.firebasestorage.app",
+        messagingSenderId: "200192472983",
+        appId: "1:200192472983:web:2a3c6b7b434068c48036d2",
+        measurementId: "G-PW6GP9SLDG"
+    };
 
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const database = firebase.database();
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
 
-        let userGroup = ""; // Store user's group
-        if(!app){
-            console.log("firebase is not working");
-        }
-        else{
-            console.log("firebase is working");
-        }
+    console.log("Firebase is working");
 
-        firebase.auth().onAuthStateChanged(user => {
-            if (user) {
-                console.log("User authenticated:", user);
-            } else {
-                console.log("User not authenticated");
-            }
-        });
-
-        // Get posts
-        function getPosts() {
-            database.ref('posts').on('value', (snapshot) => {
-                let posts = snapshot.val();
-                let output = '';
-                for(let post in posts) {
+    // Get posts from database
+    function getPosts() {
+        database.ref('posts').on('value', (snapshot) => {
+            let posts = snapshot.val();
+            let output = "";
+            if (posts) {
+                for (let post in posts) {
                     output += `
                     <div class="post">
                         <h3>${posts[post].title}</h3>
                         <p>${posts[post].content}</p>
-                        <p class="meta">Posted by: ${posts[post].user} on ${posts[post].date}</p>
+                        <p class="meta">Posted on ${posts[post].date}</p>
                     </div>
                     `;
                 }
-                document.getElementById('posts').innerHTML = output;
-            });
-        }
-        getPosts();
-
-        // Submit post
-        document.getElementById('postForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            let title = document.getElementsByName('title')[0].value;
-            let content = document.getElementsByName('content')[0].value;
-            let date = new Date().toLocaleString();
-            let user = auth.currentUser ? auth.currentUser.displayName : 'Anonymous';
-            let postData = {
-                title: title,
-                content: content,
-                date: date,
-                user: user
-            };
-            let newPostKey = database.ref().child('posts').push().key;
-            let updates = {};
-            updates['/posts/' + newPostKey] = postData;
-            database.ref().update(updates);
-            document.getElementById('postForm').reset();
+            } else {
+                output = "<p>No posts available.</p>";
+            }
+            document.getElementById('posts').innerHTML = output;
         });
+    }
+    getPosts();
+
+    // Submit post
+    document.getElementById('postForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        let title = document.getElementsByName('title')[0].value;
+        let content = document.getElementsByName('content')[0].value;
+        let date = new Date().toLocaleString();
+
+        let postData = {
+            title: title,
+            content: content,
+            date: date
+        };
+
+        let newPostKey = database.ref().child('posts').push().key;
+        let updates = {};
+        updates['/posts/' + newPostKey] = postData;
+
+        database.ref().update(updates)
+            .then(() => console.log("Post added successfully"))
+            .catch(error => console.error("Database Error:", error));
+
+        document.getElementById('postForm').reset();
     });
+});
+
     </script>
 </body>
 </html>
