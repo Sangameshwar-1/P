@@ -164,7 +164,17 @@
                     ${messageData.userId === currentUser ? `<button onclick="deleteMessage('${messageId}')">Del</button>` : ''}`;
                 messagesContainer.appendChild(messageElement);
                 messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to latest message
-            });
+                database.ref(`messages/${userGroup}`).push({
+                    userId,
+                    username,
+                    message,
+                    timestamp
+                }).then(() => {
+                    messageInput.value = ''; // Clear the input field
+                }).catch((error) => {
+                    console.error("Error sending message:", error);
+                });
+            }
         }
 
         function sendMessage() {
