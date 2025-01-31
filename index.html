@@ -21,7 +21,7 @@
             color: #fff;
             padding-top: 30px;
             min-height: 70px;
-            border-bottom: #77aaff 3pṭx solid;
+            border-bottom: #77aaff 3px solid;
         }
         header a {
             color: #fff;
@@ -197,7 +197,17 @@
                 const userId = auth.currentUser ? auth.currentUser.uid : "anonymous";
                 const username = auth.currentUser ? auth.currentUser.displayName || "Anonymous" : "Anonymous";
 
-        };
+            database.ref(`messages/${userGroup}`).push({
+                userId,
+                username,
+                message,
+                timestamp
+            }).then(() => {
+                messageInput.value = ''; // Clear the input field
+            }).catch((error) => {
+                console.error("Error sending message:", error);
+            });
+        }
     }
 
     </script>
