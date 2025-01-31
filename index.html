@@ -159,7 +159,7 @@
             let title = document.getElementsByName('title')[0].value;
             let content = document.getElementsByName('content')[0].value;
             let date = new Date().toLocaleString();
-            let user = auth.currentUser.displayName;
+            let user = auth.currentUser ? auth.currentUser.displayName : 'Anonymous';
             let postData = {
                 title: title,
                 content: content,
