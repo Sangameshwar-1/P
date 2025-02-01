@@ -36,6 +36,9 @@ class AnswerResponse(BaseModel):
 @app.post("/ask")
 async def ask_gemini(request: QuestionRequest):
     """Takes a user's prompt and returns AI-generated response."""
+    # Your existing code
+
+    """Takes a user's prompt and returns AI-generated response."""
     try:
         # You may need to use async methods if generativeai supports it
         model = genai.GenerativeModel("gemini-pro")
