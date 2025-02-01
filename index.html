@@ -21,7 +21,7 @@
     </header>
     <div class="container">
         <div class="main">
-            <div id="disscussion-list">
+            <div id="discussion-list">
                 <div class="post">
                     <h3 id="title">Title</h3>
                     <button id="open">View discussion</button>
@@ -66,7 +66,7 @@
     }
 
     // Get the discussion list container
-    const discussionList = document.getElementById("disscussion-list");
+    const discussionList = document.getElementById("discussion-list");
     // Get the discussions from the database and display them
     function getDiscussions() {
         database.ref("discussions").on("value", function(snapshot) {
@@ -82,20 +82,21 @@
                 `;
                 discussionList.appendChild(discussionElement);
             });
-            // Call the openDiscussion function to add event listeners to the buttons
+
+            // Add event listeners for opening discussion
             openDiscussion();
         });
+    }
 
-        function openDiscussion() {
-            // on click of the button, open the discussion page by parsing the title
-            document.querySelectorAll(".open").forEach(button => {
-                button.addEventListener("click", function() {
-                    const title = this.previousElementSibling.textContent;
-                    window.location.href = `discussion_page.html?title=${encodeURIComponent(title)}`;
-                });
+    // Add a click event listener to each "View discussion" button
+    function openDiscussion() {
+        document.querySelectorAll(".open").forEach(button => {
+            button.addEventListener("click", function() {
+                const title = this.previousElementSibling.previousElementSibling.textContent;
+                // Redirect to discussion_page.html with the discussion title as a URL parameter
+                window.location.href = `discussion_page.html?title=${encodeURIComponent(title)}`;
             });
-            console.log("Opening discussion");
-        }
+        });
     }
     function createDiscussion() {
         // Handle form submission
@@ -121,6 +122,7 @@
     }
     
      
+    }
     </script>
 </body>
 </html>
