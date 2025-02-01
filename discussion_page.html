@@ -188,28 +188,20 @@
         });
     const baseUrl = 'https://ptest.up.railway.app';    
 
-    async function getAnswer(question) {
-        try {
-            const response = await fetch(`${baseUrl}/ask`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ question })
-            });
-    
-            // Check if the response was successful
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+    const askForm = document.getElementById('ask-AI');
+        const questionInput = document.getElementById('question');
+        const answerDiv = document.getElementById('answer');
+
+        askForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent form submission
+
+            const question = questionInput.value.trim();
+            if (question) {
+                answerDiv.innerHTML = 'Loading...'; // Show loading text while waiting for response
+                const answer = await getAnswer(question);
+                answerDiv.innerHTML = `<p><strong>AI Response:</strong> ${answer}</p>`;
             }
-    
-            const data = await response.json();
-            return data.response || "Sorry, I couldn't find an answer.";
-        } catch (error) {
-            console.error("There was a problem with the fetch operation:", error);
-            return "There was an error connecting to the server. Please try again later.";
-        }
-    }
+        });
 
     </script>
 </body>
