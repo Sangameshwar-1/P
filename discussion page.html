@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discussion Group</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding-top: 30px;
+            min-height: 70px;
+            border-bottom: #77aaff 3px solid;
+        }
+        header a {
+            color: #fff;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 16px;
+        }
+        header ul {
+            padding: 0;
+            list-style: none;
+        }
+        header li {
+            float: left;
+            display: inline;
+            padding: 0 20px 0 20px;
+        }
+        .main-content {
+            padding: 20px;
+            background: #fff;
+            margin-top: 20px;
+        }
+        .discussion-form {
+            margin-bottom: 20px;
+        }
+        .discussion-form input, .discussion-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+        }
+        .discussion-form button {
+            padding: 10px 20px;
+            background: #333;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .discussion-form button:hover {
+            background: #555;
+        }
+        .discussion-list {
+            list-style: none;
+            padding: 0;
+        }
+        .discussion-list li {
+            background: #eee;
+            margin: 10px 0;
+            padding: 10px;
+            border-left: #77aaff 5px solid;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Discussion Group</h1>
+            <nav>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <div class="container">
+        <div class="main-content">
+            <div class="discussion-msg">
+                <h4 id="msg"></h4>
+                <h4 id="time"></h4>
+            </div>
+            <form class="discussion-form" onsubmit="postmessage(event)"></form>
+                <input type="text" placeholder="Title" required>
+                <textarea placeholder="Your message" rows="5" required></textarea>
+                <button type="submit">Post</button>
+            </form>
+            <ul class="discussion-list"></ul>
+        </div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        document.addEventListener("DOMContentLoaded", function() {
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD23-6Ms6bd4ePn80p1sYUvV8RalfTPEcE",
+            authDomain: "test-9576c.firebaseapp.com",
+            databaseURL: "https://test-9576c-default-rtdb.firebaseio.com",
+            projectId: "test-9576c",
+            storageBucket: "test-9576c.firebasestorage.app",
+            messagingSenderId: "200192472983",
+            appId: "1:200192472983:web:2a3c6b7b434068c48036d2",
+            measurementId: "G-PW6GP9SLDG"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        window.onload = function(){
+            database.ref('discussions').on('value', function(snapshot){
+                const discussionList = document.querySelector('.discussion-list');
+                discussionList.innerHTML = '';
+                snapshot.forEach(function(childSnapshot){
+                    const childKey = childSnapshot.key;
+                    const childData = childSnapshot.val();
+                    const li = document.createElement('li');
+                    li.innerHTML = '<h3>' + childData.title + '</h3><p>' + childData.message + '</p>';
+                    discussionList.appendChild(li);
+                });
+            });
+            
+        }
+        function postmessage(e){
+            e.preventDefault();
+            const title = document.querySelector('.discussion-form input').value;
+            const message = document.querySelector('.discussion-form textarea').value;
+            if(title && message){
+                database.ref('discussions').push({
+                    title: title,
+                    message: message,
+                    time: new Date().toLocaleString()
+                });
+                document.querySelector('.discussion-form input').value = '';
+                document.querySelector('.discussion-form textarea').value = '';
+            }
+        }
+    </script>
+</body>
+</html>
+
+  

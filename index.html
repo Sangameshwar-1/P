@@ -21,14 +21,19 @@
     </header>
     <div class="container">
         <div class="main">
-            <h2>Recent Discussions</h2>
-            <div id="posts"></div>
-            <div class="new-post">
-                <h2>Create a New Post</h2>
-                <form id="postForm">
-                    <input type="text" name="title" placeholder="Title">
-                    <textarea name="content" placeholder="Write your post here..."></textarea>
-                    <input type="submit" value="Submit">
+            <div id="disscussion-list">
+                <div class="post">
+                    <h3 id="title">Title</h3>
+                    <button id="open">View discussion</button>
+                    <p class="meta">Posted on 01/01/2021</p>
+                </div>
+            </div>
+            <div id="new-discussion">
+                <h2>New Discussion</h2>
+                <form class="discussion-form">
+                    <input type="text" placeholder="Title">
+                    <textarea placeholder="Message"></textarea>
+                    <button type="submit">Create Discussion</button>
                 </form>
             </div>
         </div>
@@ -56,55 +61,55 @@
 
     console.log("Firebase is working");
 
-    // Get posts from database
-    function getPosts() {
-        database.ref('posts').on('value', (snapshot) => {
-            let posts = snapshot.val();
-            let output = "";
-            if (posts) {
-                for (let post in posts) {
-                    output += `
-                    <div class="post">
-                        <h3>${posts[post].title}</h3>
-                        <p>${posts[post].content}</p>
-                        <p class="meta">Posted on ${posts[post].date}</p>
-                    </div>
-                    `;
-                }
-            } else {
-                output = "<p>No posts available.</p>";
-            }
-            document.getElementById('posts').innerHTML = output;
+    // Get the discussion list container
+    const discussionList = document.getElementById("disscussion-list");
+    window.onload = function() {
+        // Get the discussions from the database
+        database.ref("discussions").once("value", function(snapshot) {
+            snapshot.forEach(function(childSnapshot) {
+                const childData = childSnapshot.val();
+                const discussionElement = document.createElement("div");
+                discussionElement.classList.add("post");
+                discussionElement.innerHTML = `
+                    <h3>${childData.title}</h3>
+                    <button id="open">View discussion</button>
+                    <p class="meta">Posted on ${childData.timestamp}</p>
+                `;
+                discussionList.appendChild(discussionElement);
+            });
+        });
+    };
+    function createDiscussion() {
+        // Handle form submission
+        document.querySelector('.discussion-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const title = e.target.querySelector('input').value;
+            const message = e.target.querySelector('textarea').value;
+            const timestamp = new Date();
+            database.ref('discussions').push({
+                title: title,
+                message: message,
+                timestamp: timestamp
+            }).then(() => {
+                console.log("Discussion created");
+            });
         });
     }
-    getPosts();
+    function openDiscussion() {
+        // on click of the button, open the discussion page by parsing the title
+        document.querySelectorAll("#open").forEach(button => {
+            button.addEventListener("click", function() {
+                const title = this.previousElementSibling.textContent;
+                window.location.href = `discussion page.html?title=${encodeURIComponent(title)}`;
+            });
+        });
+        console.log("Opening discussion");
+    }
 
-    // Submit post
-    document.getElementById('postForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-
-        let title = document.getElementsByName('title')[0].value;
-        let content = document.getElementsByName('content')[0].value;
-        let date = new Date().toLocaleString();
-
-        let postData = {
-            title: title,
-            content: content,
-            date: date
-        };
-
-        let newPostKey = database.ref().child('posts').push().key;
-        let updates = {};
-        updates['/posts/' + newPostKey] = postData;
-
-        database.ref().update(updates)
-            .then(() => console.log("Post added successfully"))
-            .catch(error => console.error("Database Error:", error));
-
-        document.getElementById('postForm').reset();
-    });
-});
-
+    // Call the openDiscussion function to add event listeners to the buttons
+    openDiscussion();
+   });
+     
     </script>
 </body>
 </html>
