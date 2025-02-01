@@ -54,7 +54,11 @@
             const messagesList = document.getElementById('messages-list');
 
             // Set the title of the discussion page
-            document.getElementById('discussion-title').innerText = discussionTitle;
+            if (discussionTitle) {
+                document.getElementById('discussion-title').innerText = discussionTitle;
+            } else {
+                document.getElementById('discussion-title').innerText = "Discussion Not Found";
+            }
 
             // Get the messages for this specific discussion
             function getMessages() {
