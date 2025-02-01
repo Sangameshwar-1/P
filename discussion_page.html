@@ -189,23 +189,28 @@
     const baseUrl = 'https://test-production-6336.up.railway.app';    
 
     async function getAnswer(question) {
-         const response = await fetch(`${baseUrl}/ask`, {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ question })
-         });
-         const data = await response.json();
-         return data.answer;
-     }
-  
-     document.getElementById("ask-AI").addEventListener("submit", async function(e) {
-         e.preventDefault();
-         const question = document.getElementById("question").value;
-         const answer = await getAnswer(question);
-            document.getElementById("answer").innerText = answer;
-     });
+        try {
+            const response = await fetch(`${baseUrl}/ask`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ question })
+            });
+    
+            // Check if the response was successful
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+    
+            const data = await response.json();
+            return data.response || "Sorry, I couldn't find an answer.";
+        } catch (error) {
+            console.error("There was a problem with the fetch operation:", error);
+            return "There was an error connecting to the server. Please try again later.";
+        }
+    }
+
     </script>
 </body>
 </html>
