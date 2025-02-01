@@ -95,7 +95,14 @@
         </div>
     </header>
     <div class="container">
-        <div id="discussion-container">
+        <div class="ask">
+            <form id="ask-AI">
+                <input type="text" id="question" placeholder="Enter your question" required>
+                <button type="submit" id="submit">Submit</button>
+            </form>
+            <div id="answer"></div>
+        </div>
+        <div id="discussion-container"> 
             <h2 id="discussion-title">Loading Discussion...</h2>
             <div id="messages-list"></div>
             <form id="message-form">
@@ -179,6 +186,26 @@
 
             getMessages(); // Initial load of messages
         });
+    const baseUrl = 'https://test-production-6336.up.railway.app';    
+
+    async function getAnswer(question) {
+         const response = await fetch(`${baseUrl}/ask`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ question })
+         });
+         const data = await response.json();
+         return data.answer;
+     }
+  
+     document.getElementById("ask-AI").addEventListener("submit", async function(e) {
+         e.preventDefault();
+         const question = document.getElementById("question").value;
+         const answer = await getAnswer(question);
+            document.getElementById("answer").innerText = answer;
+     });
     </script>
 </body>
 </html>
