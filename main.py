@@ -3,7 +3,7 @@ import google.generativeai as genai
 from pydantic import BaseModel
 
 # Initialize FastAPI app
-app = FastAPI()
+app = FastAPI() 
 
 # Configure Gemini AI API Key
 GEMINI_API_KEY = "AIzaSyCi-GoXnRJVeb6Di-d-6wT1NWcKH-Khj7M"
