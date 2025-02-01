@@ -1,4 +1,5 @@
 fastapi
-fastapi-cors
-uvicorn[standard]
 google-generativeai
+pydantic
+uvicorn
+fastapi[all]
