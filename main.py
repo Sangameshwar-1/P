@@ -1,7 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 import google.generativeai as genai
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+import asyncio
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -36,9 +37,12 @@ class AnswerResponse(BaseModel):
 async def ask_gemini(request: QuestionRequest):
     """Takes a user's prompt and returns AI-generated response."""
     try:
-        # Make a request to Gemini AI API
+        # You may need to use async methods if generativeai supports it
         model = genai.GenerativeModel("gemini-pro")
-        response = model.generate_content(request.question)
+        response = await asyncio.to_thread(model.generate_content, request.question)  # Run blocking code in a thread
+
         return {"response": response.text}
+
     except Exception as e:
-        return {"response": f"Error: {str(e)}"}
+        # Return a more descriptive error
+        raise HTTPException(status_code=500, detail=f"Error occurred: {str(e)}")
