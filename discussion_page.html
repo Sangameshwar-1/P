@@ -4,6 +4,84 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Discussion Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding-top: 30px;
+            min-height: 70px;
+            border-bottom: #77aaff 3px solid;
+        }
+        header a {
+            color: #fff;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 16px;
+        }
+        header ul {
+            padding: 0;
+            list-style: none;
+        }
+        header li {
+            display: inline;
+            padding: 0 20px 0 20px;
+        }
+        #discussion-container {
+            background: #fff;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #discussion-title {
+            margin-bottom: 20px;
+        }
+        #messages-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background: #fafafa;
+        }
+        #messages-list div {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        #messages-list div:last-child {
+            border-bottom: none;
+        }
+        #message-form {
+            display: flex;
+        }
+        #message-form input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px 0 0 5px;
+        }
+        #message-form button {
+            padding: 10px;
+            border: none;
+            background: #333;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 0 5px 5px 0;
+        }
+        #message-form button:hover {
+            background: #555;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -93,7 +171,7 @@
                     text: messageText,
                     timestamp: timestamp
                 }).then(() => {
-                    console.log("Message sent!");
+                    console.log("Message sent!"); // Log success
                     messageInput.value = ""; // Clear the input
                     getMessages(); // Refresh messages
                 });
