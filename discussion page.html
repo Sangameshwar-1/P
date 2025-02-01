@@ -45,34 +45,37 @@
             firebase.initializeApp(firebaseConfig);
             const database = firebase.database();
 
-            // Get the discussion title from the URL parameter
+            // Get the discussion ID from the URL parameter
             const urlParams = new URLSearchParams(window.location.search);
-            const discussionTitle = urlParams.get('title');
+            const discussionId = urlParams.get('id');
             const discussionContainer = document.getElementById('discussion-container');
             const messageForm = document.getElementById('message-form');
             const messageInput = document.getElementById('message');
             const messagesList = document.getElementById('messages-list');
 
             // Set the title of the discussion page
-            if (discussionTitle) {
-                document.getElementById('discussion-title').innerText = discussionTitle;
+            if (discussionId) {
+                database.ref('discussions/' + discussionId).once('value').then(function(snapshot) {
+                    const discussionData = snapshot.val();
+                    if (discussionData) {
+                        document.getElementById('discussion-title').innerText = discussionData.title;
+                    } else {
+                        document.getElementById('discussion-title').innerText = "Discussion Not Found";
+                    }
+                });
             } else {
                 document.getElementById('discussion-title').innerText = "Discussion Not Found";
             }
 
             // Get the messages for this specific discussion
             function getMessages() {
-                database.ref("discussions").orderByChild("title").equalTo(discussionTitle).on("value", function(snapshot) {
+                database.ref('discussions/' + discussionId + '/messages').on('value', function(snapshot) {
                     messagesList.innerHTML = ""; // Clear messages
-                    snapshot.forEach(function(discussionSnapshot) {
-                        const discussionData = discussionSnapshot.val();
-                        if (discussionData.messages) {
-                            Object.values(discussionData.messages).forEach(message => {
-                                const messageElement = document.createElement('div');
-                                messageElement.innerHTML = `<p><strong>${message.user}:</strong> ${message.text}</p>`;
-                                messagesList.appendChild(messageElement);
-                            });
-                        }
+                    snapshot.forEach(function(messageSnapshot) {
+                        const messageData = messageSnapshot.val();
+                        const messageElement = document.createElement('div');
+                        messageElement.innerHTML = `<p><strong>${messageData.user}:</strong> ${messageData.text}</p>`;
+                        messagesList.appendChild(messageElement);
                     });
                 });
             }
@@ -85,19 +88,14 @@
                 const timestamp = new Date().getTime();
 
                 // Add the message to Firebase
-                database.ref('discussions').orderByChild('title').equalTo(discussionTitle).once("value", function(snapshot) {
-                    snapshot.forEach(function(discussionSnapshot) {
-                        const discussionKey = discussionSnapshot.key;
-                        database.ref('discussions/' + discussionKey + '/messages').push({
-                            user: user,
-                            text: messageText,
-                            timestamp: timestamp
-                        }).then(() => {
-                            console.log("Message sent!");
-                            messageInput.value = ""; // Clear the input
-                            getMessages(); // Refresh messages
-                        });
-                    });
+                database.ref('discussions/' + discussionId + '/messages').push({
+                    user: user,
+                    text: messageText,
+                    timestamp: timestamp
+                }).then(() => {
+                    console.log("Message sent!");
+                    messageInput.value = ""; // Clear the input
+                    getMessages(); // Refresh messages
                 });
             });
 
