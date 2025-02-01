@@ -33,7 +33,7 @@ class AnswerResponse(BaseModel):
     response: str
 
 # Ask anything to Gemini AI
-@app.post("/ask", response_model=AnswerResponse)
+@app.post("/ask")
 async def ask_gemini(request: QuestionRequest):
     """Takes a user's prompt and returns AI-generated response."""
     try:
