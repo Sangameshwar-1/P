@@ -120,32 +120,32 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        window.onload = function(){
-            database.ref('discussions').on('value', function(snapshot){
-                const discussionList = document.querySelector('.discussion-list');
-                discussionList.innerHTML = '';
-                snapshot.forEach(function(childSnapshot){
-                    const childKey = childSnapshot.key;
-                    const childData = childSnapshot.val();
-                    const li = document.createElement('li');
-                    li.innerHTML = '<h3>' + childData.title + '</h3><p>' + childData.message + '</p>';
-                    discussionList.appendChild(li);
-                });
+        window.onload = function() {
+            database.ref('discussions').on('value', function(snapshot) {
+            const discussionList = document.querySelector('.discussion-list');
+            discussionList.innerHTML = '';
+            snapshot.forEach(function(childSnapshot) {
+                const childKey = childSnapshot.key;
+                const childData = childSnapshot.val();
+                const li = document.createElement('li');
+                li.innerHTML = '<h3>' + childData.title + '</h3><p>' + childData.message + '</p>';
+                discussionList.appendChild(li);
             });
-            
+            });
         }
-        function postmessage(e){
+
+        function postmessage(e) {
             e.preventDefault();
             const title = document.querySelector('.discussion-form input').value;
             const message = document.querySelector('.discussion-form textarea').value;
-            if(title && message){
-                database.ref('discussions').push({
-                    title: title,
-                    message: message,
-                    time: new Date().toLocaleString()
-                });
-                document.querySelector('.discussion-form input').value = '';
-                document.querySelector('.discussion-form textarea').value = '';
+            if (title && message) {
+            database.ref('discussions').push({
+                title: title,
+                message: message,
+                time: new Date().toLocaleString()
+            });
+            document.querySelector('.discussion-form input').value = '';
+            document.querySelector('.discussion-form textarea').value = '';
             }
         }
     </script>
