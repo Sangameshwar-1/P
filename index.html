@@ -60,41 +60,47 @@
     const database = firebase.database();
 
     console.log("Firebase is working");
+    window.onload = function() {
+        getDiscussions();
+        createDiscussion();
+    }
 
     // Get the discussion list container
     const discussionList = document.getElementById("disscussion-list");
     // Get the discussions from the database and display them
-    database.ref("discussions").on("value", function(snapshot) {
-        discussionList.innerHTML = ""; // Clear the list before adding new items
-        snapshot.forEach(function(childSnapshot) {
-            const childData = childSnapshot.val();
-            const discussionElement = document.createElement("div");
-            discussionElement.classList.add("post");
-            discussionElement.innerHTML = `
-                <h3>${childData.title}</h3>
-                <button class="open">View discussion</button>
-                <p class="meta">Posted on ${new Date(childData.timestamp).toLocaleString()}</p>
-            `;
-            discussionList.appendChild(discussionElement);
-        });
-        // Call the openDiscussion function to add event listeners to the buttons
-        openDiscussion();
-    });
+    function getDiscussions() {
 
-    function openDiscussion() {
-        // on click of the button, open the discussion page by parsing the title
-        document.querySelectorAll(".open").forEach(button => {
-            button.addEventListener("click", function() {
-                const title = this.previousElementSibling.textContent;
-                window.location.href = `discussion page.html?title=${encodeURIComponent(title)}`;
+            database.ref("discussions").on("value", function(snapshot) {
+                discussionList.innerHTML = ""; // Clear the list before adding new items
+                snapshot.forEach(function(childSnapshot) {
+                    const childData = childSnapshot.val();
+                    const discussionElement = document.createElement("div");
+                    discussionElement.classList.add("post");
+                    discussionElement.innerHTML = `
+                        <h3>${childData.title}</h3>
+                        <button class="open">View discussion</button>
+                        <p class="meta">Posted on ${new Date(childData.timestamp).toLocaleString()}</p>
+                    `;
+                    discussionList.appendChild(discussionElement);
+                });
+                // Call the openDiscussion function to add event listeners to the buttons
+                openDiscussion();
             });
-        });
-        console.log("Opening discussion");
-    }
 
-    // Call the openDiscussion function to add event listeners to the buttons
-    openDiscussion();
-   });
+            function openDiscussion() {
+                // on click of the button, open the discussion page by parsing the title
+                document.querySelectorAll(".open").forEach(button => {
+                    button.addEventListener("click", function() {
+                        const title = this.previousElementSibling.textContent;
+                        window.location.href = `discussion_page.html?title=${encodeURIComponent(title)}`;
+                    });
+                });
+                console.log("Opening discussion");
+            }
+
+            // Call the openDiscussion function to add event listeners to the buttons
+            openDiscussion();
+    }
     function createDiscussion() {
         // Handle form submission
         document.querySelector('.discussion-form').addEventListener('submit', function(e) {

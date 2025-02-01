@@ -121,33 +121,42 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         window.onload = function() {
+            getmessages();
+            postmessage();
+        }
+        function getmessages() {
             database.ref('discussions').on('value', function(snapshot) {
-            const discussionList = document.querySelector('.discussion-list');
-            discussionList.innerHTML = '';
-            snapshot.forEach(function(childSnapshot) {
-                const childKey = childSnapshot.key;
-                const childData = childSnapshot.val();
-                const li = document.createElement('li');
-                li.innerHTML = '<h3>' + childData.title + '</h3><p>' + childData.message + '</p>';
-                discussionList.appendChild(li);
-            });
+                const discussions = snapshot.val();
+                const discussionList = document.querySelector('.discussion-list');
+                discussionList.innerHTML = '';
+                for (let id in discussions) {
+                    const discussion = discussions[id];
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <h3>${discussion.title}</h3>
+                        <p>${discussion.message}</p>
+                        <p>${discussion.time}</p>
+                    `;
+                    discussionList.appendChild(li);
+                }
             });
         }
-
-        function postmessage(e) {
-            e.preventDefault();
+        function postmessage(event) {
+            event.preventDefault();
             const title = document.querySelector('.discussion-form input').value;
             const message = document.querySelector('.discussion-form textarea').value;
-            if (title && message) {
+            const time = new Date().toLocaleString();
             database.ref('discussions').push({
                 title: title,
                 message: message,
-                time: new Date().toLocaleString()
+                time: time
             });
             document.querySelector('.discussion-form input').value = '';
             document.querySelector('.discussion-form textarea').value = '';
-            }
         }
+
+        
+        
     </script>
 </body>
 </html>
