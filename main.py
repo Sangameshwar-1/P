@@ -31,7 +31,7 @@ async def index():
     return HTMLResponse(content=template.render(users=users))
 
 # Add new user (POST)
-@app.post("/add")
+@app.api_route("/add", methods=["GET", "POST"])
 async def add_user(name: str, email: str):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -41,5 +41,6 @@ async def add_user(name: str, email: str):
     conn.close()
 
     return {"message": "User added successfully!", "name": name, "email": email}
+
 
 # Run the app using: uvicorn main:app --reload
