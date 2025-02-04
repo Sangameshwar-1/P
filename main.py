@@ -1,34 +1,38 @@
-from fastapi import FastAPI, Form
-from fastapi import Request, FastAPI
-from fastapi.responses import JSONResponse
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import FastAPI, Form, Request, HTTPException
+from fastapi.responses import JSONResponse, HTMLResponse
 from jinja2 import Environment, FileSystemLoader
 import psycopg2
 import os
+import logging
 
 # Initialize FastAPI app
 app = FastAPI()
 
-@app.exception_handler(Exception)
-async def validation_exception_handler(request: Request, exc: Exception):
-    return JSONResponse(
-        status_code=500,
-        content={"message": f"Internal Server Error: {exc}"}
-    )
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
 
-
+# Jinja2 template configuration
+templates = Environment(loader=FileSystemLoader("templates"))
 
 # Database connection
 DATABASE_URL = "postgresql://sale:X7eXTvOY6RtWchx2oCo4LA@mystic-ninja-4440.jxf.gcp-us-west2.cockroachlabs.cloud:26257/sangam?sslmode=verify-full"
 
 # Function to get database connection
 def get_db_connection():
-    conn = None
     try:
         conn = psycopg2.connect(DATABASE_URL)
+        return conn
     except psycopg2.Error as e:
-        print(f"Error connecting to the database: {e}")
-    return conn
+        raise HTTPException(status_code=500, detail=f"Error connecting to the database: {e}")
+
+# Exception handler for general errors
+@app.exception_handler(Exception)
+async def validation_exception_handler(request: Request, exc: Exception):
+    logging.error(f"Error: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"message": f"Internal Server Error: {exc}"}
+    )
 
 # Endpoint to check database connection
 @app.get("/check-connection")
@@ -53,7 +57,7 @@ async def index():
     cursor.close()
     conn.close()
 
-    
+    template = templates.get_template("index.html")
     return HTMLResponse(content=template.render(users=users))
 
 # Add new user (POST)
@@ -79,7 +83,7 @@ async def view_users():
             cursor.execute('SELECT * FROM users;')
             users = cursor.fetchall()
         except psycopg2.Error as e:
-            print(f"Error executing query: {e}")
+            logging.error(f"Error executing query: {e}")
         finally:
             cursor.close()
             conn.close()
