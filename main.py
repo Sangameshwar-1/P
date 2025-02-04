@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Request, Form, Depends
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import FastAPI, Form
+from fastapi.responses import HTMLResponse, JSONResponse
 from jinja2 import Environment, FileSystemLoader
 import psycopg2
 import os
@@ -7,15 +7,20 @@ import os
 # Initialize FastAPI app
 app = FastAPI()
 
+# # Initialize Jinja2 environment
+# templates = Environment(loader=FileSystemLoader("templates"))
+
 # Database connection
 DATABASE_URL = "postgresql://sale:QeDD3bw2Vr6FptLFE5QsTQ@mystic-ninja-4440.jxf.gcp-us-west2.cockroachlabs.cloud:26257/sangam?sslmode=verify-full"
 
-# Jinja2 template configuration
-templates = Environment(loader=FileSystemLoader("templates"))
-
 # Function to get database connection
 def get_db_connection():
-    return psycopg2.connect(DATABASE_URL)
+    conn = None
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+    except psycopg2.Error as e:
+        print(f"Error connecting to the database: {e}")
+    return conn
 
 # Home route (Fetch users)
 @app.get("/", response_class=HTMLResponse)
@@ -31,8 +36,8 @@ async def index():
     return HTMLResponse(content=template.render(users=users))
 
 # Add new user (POST)
-@app.api_route("/add", methods=["GET", "POST"])
-async def add_user(name: str, email: str):
+@app.post("/add")
+async def add_user(name: str = Form(...), email: str = Form(...)):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('INSERT INTO users (name, email) VALUES (%s, %s)', (name, email))
@@ -42,5 +47,22 @@ async def add_user(name: str, email: str):
 
     return {"message": "User added successfully!", "name": name, "email": email}
 
+# View users command
+@app.get("/view-users", response_class=JSONResponse)
+async def view_users():
+    users = []
+    conn = get_db_connection()
+    if conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute('SELECT * FROM users;')
+            users = cursor.fetchall()
+        except psycopg2.Error as e:
+            print(f"Error executing query: {e}")
+        finally:
+            cursor.close()
+            conn.close()
+    
+    return JSONResponse(content={"users": users})
 
 # Run the app using: uvicorn main:app --reload
