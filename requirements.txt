@@ -1,8 +1,4 @@
 fastapi
-fastapi-cors
-uvicorn[standard]
-psycopg2 
-uvicorn 
+uvicorn
+psycopg2-binary
 jinja2
-
-
