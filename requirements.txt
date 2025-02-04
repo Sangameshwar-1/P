@@ -1,4 +1,5 @@
-uvicorn
 fastapi
+fastapi-cors
+uvicorn[standard]
 flask 
 psycopg2-binary
