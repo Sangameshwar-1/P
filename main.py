@@ -1,4 +1,6 @@
 from fastapi import FastAPI, Form
+from fastapi import Request, FastAPI
+from fastapi.responses import JSONResponse
 from fastapi.responses import HTMLResponse, JSONResponse
 from jinja2 import Environment, FileSystemLoader
 import psycopg2
@@ -7,8 +9,14 @@ import os
 # Initialize FastAPI app
 app = FastAPI()
 
-# # Initialize Jinja2 environment
-# templates = Environment(loader=FileSystemLoader("templates"))
+@app.exception_handler(Exception)
+async def validation_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={"message": f"Internal Server Error: {exc}"}
+    )
+
+
 
 # Database connection
 DATABASE_URL = "postgresql://sale:X7eXTvOY6RtWchx2oCo4LA@mystic-ninja-4440.jxf.gcp-us-west2.cockroachlabs.cloud:26257/sangam?sslmode=verify-full"
@@ -45,7 +53,7 @@ async def index():
     cursor.close()
     conn.close()
 
-    template = templates.get_template("index.html")
+    
     return HTMLResponse(content=template.render(users=users))
 
 # Add new user (POST)
