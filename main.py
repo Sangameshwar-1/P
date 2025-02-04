@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.DEBUG)
 templates = Environment(loader=FileSystemLoader("templates"))
 
 # Database connection
-DATABASE_URL = "postgresql://sale:X7eXTvOY6RtWchx2oCo4LA@mystic-ninja-4440.jxf.gcp-us-west2.cockroachlabs.cloud:26257/sangam?sslmode=verify-full"
+DATABASE_URL = "postgresql://sale:X7eXTvOY6RtWchx2oCo4LA@mystic-ninja-4440.jxf.gcp-us-west2.cockroachlabs.cloud:26257/sangam?sslmode=verify-full&sslrootcert=https://cockroachlabs.cloud/clusters/e7f49c39-2968-4108-82ee-e452f0306e05/cert"
 
 # Function to get database connection
 def get_db_connection():
