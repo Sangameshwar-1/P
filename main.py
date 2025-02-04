@@ -11,7 +11,7 @@ app = FastAPI()
 # templates = Environment(loader=FileSystemLoader("templates"))
 
 # Database connection
-DATABASE_URL = "postgresql://sale:QeDD3bw2Vr6FptLFE5QsTQ@mystic-ninja-4440.jxf.gcp-us-west2.cockroachlabs.cloud:26257/sangam?sslmode=verify-full"
+DATABASE_URL = "postgresql://sale:X7eXTvOY6RtWchx2oCo4LA@mystic-ninja-4440.jxf.gcp-us-west2.cockroachlabs.cloud:26257/sangam?sslmode=verify-full"
 
 # Function to get database connection
 def get_db_connection():
