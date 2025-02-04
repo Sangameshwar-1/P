@@ -1,51 +1,45 @@
-from fastapi import FastAPI, HTTPException
-import google.generativeai as genai
-from pydantic import BaseModel
-from fastapi.middleware.cors import CORSMiddleware
-import asyncio
+from flask import Flask, request, jsonify
+import psycopg2
 
-# Initialize FastAPI app
-app = FastAPI()
+app = Flask(__name__)
 
-# Configure Gemini AI API Key
-GEMINI_API_KEY = "AIzaSyCi-GoXnRJVeb6Di-d-6wT1NWcKH-Khj7M"
-genai.configure(api_key=GEMINI_API_KEY)
-
-# CORS middleware to allow requests from specific origin
-origins = [
-    "https://naniiiiii.netlify.app",  # Add your frontend URL here
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,  # Allow the listed origins
-    allow_credentials=True,
-    allow_methods=["*"],  # Allows all HTTP methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allows all headers
+# Connect to CockroachDB
+conn = psycopg2.connect(
+    dbname="webapp",
+    user="root",
+    host="localhost",
+    port=26257
 )
+cursor = conn.cursor()
 
-# Define a request model for the incoming question
-class QuestionRequest(BaseModel):
-    question: str
+# Create table (Run this only once)
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        name STRING,
+        email STRING
+    )
+""")
+conn.commit()
 
-# Define the response model (could be modified to include more data)
-class AnswerResponse(BaseModel):
-    response: str
+# Route to get users
+@app.route("/users", methods=["GET"])
+def get_users():
+    cursor.execute("SELECT * FROM users")
+    users = cursor.fetchall()
+    return jsonify(users)
 
-# Ask anything to Gemini AI
-@app.post("/ask")
-async def ask_gemini(request: QuestionRequest):
-    """Takes a user's prompt and returns AI-generated response."""
-    # Your existing code
+# Route to add a user
+@app.route("/users", methods=["POST"])
+def add_user():
+    data = request.json
+    cursor.execute("INSERT INTO users (name, email) VALUES (%s, %s)", (data["name"], data["email"]))
+    conn.commit()
+    return jsonify({"message": "User added!"})
 
-    """Takes a user's prompt and returns AI-generated response."""
-    try:
-        # You may need to use async methods if generativeai supports it
-        model = genai.GenerativeModel("gemini-pro")
-        response = await asyncio.to_thread(model.generate_content, request.question)  # Run blocking code in a thread
+# Run the app
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=5000)
 
-        return {"response": response.text}
 
-    except Exception as e:
-        # Return a more descriptive error
-        raise HTTPException(status_code=500, detail=f"Error occurred: {str(e)}")
+
