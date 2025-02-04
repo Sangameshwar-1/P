@@ -32,7 +32,7 @@ async def index():
 
 # Add new user (POST)
 @app.post("/add")
-async def add_user(name: str = Form(...), email: str = Form(...)):
+async def add_user(name: str, email: str):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('INSERT INTO users (name, email) VALUES (%s, %s)', (name, email))
@@ -40,6 +40,6 @@ async def add_user(name: str = Form(...), email: str = Form(...)):
     cursor.close()
     conn.close()
 
-    return RedirectResponse(url="/", status_code=303)
+    return {"message": "User added successfully!", "name": name, "email": email}
 
 # Run the app using: uvicorn main:app --reload
