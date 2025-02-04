@@ -5,8 +5,8 @@ import os
 app = Flask(__name__)
 DATABASE_URL="postgresql://sale:QeDD3bw2Vr6FptLFE5QsTQ@mystic-ninja-4440.jxf.gcp-us-west2.cockroachlabs.cloud:26257/sangam?sslmode=verify-full"
 
-# Get the connection string from the environment variable (DATABASE_URL)
-DATABASE_URL = os.getenv("DATABASE_URL")
+# # Get the connection string from the environment variable (DATABASE_URL)
+# DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Connect to CockroachDB
 def get_db_connection():
