@@ -11,7 +11,7 @@ RUN pip install --upgrade pip
 COPY . /app
 
 # Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
 # Expose the Flask app port (default is 5000)
 EXPOSE 5000
