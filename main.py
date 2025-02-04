@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 # Connect to CockroachDB
 conn = psycopg2.connect(
-    dbname="webapp",
+    dbname="sale",
     user="root",
     host="localhost",
     port=26257
