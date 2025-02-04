@@ -1,5 +1,7 @@
 fastapi
 fastapi-cors
 uvicorn[standard]
-flask 
-psycopg2
+Flask==2.0.3
+psycopg2==2.9.3
+python-dotenv==0.19.2
+
