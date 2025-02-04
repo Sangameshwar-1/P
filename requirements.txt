@@ -1,5 +1,2 @@
-fastapi
-google-generativeai
-pydantic
-uvicorn
-fastapi[all]
+flask 
+psycopg2-binary
