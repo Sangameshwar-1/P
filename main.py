@@ -22,6 +22,19 @@ def get_db_connection():
         print(f"Error connecting to the database: {e}")
     return conn
 
+# Endpoint to check database connection
+@app.get("/check-connection")
+async def check_connection():
+    conn = get_db_connection()
+    if conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1")
+        cursor.close()
+        conn.close()
+        return {"message": "Database connection successful!"}
+    else:
+        raise HTTPException(status_code=500, detail="Database connection failed!")
+
 # Home route (Fetch users)
 @app.get("/", response_class=HTMLResponse)
 async def index():
