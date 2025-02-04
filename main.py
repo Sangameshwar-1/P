@@ -1,45 +1,46 @@
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, redirect
 import psycopg2
+import os
 
 app = Flask(__name__)
+DATABASE_URL="postgresql://sale:QeDD3bw2Vr6FptLFE5QsTQ@mystic-ninja-4440.jxf.gcp-us-west2.cockroachlabs.cloud:26257/sangam?sslmode=verify-full"
+
+# Get the connection string from the environment variable (DATABASE_URL)
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Connect to CockroachDB
-conn = psycopg2.connect(
-    dbname="webapp",         # The name of the database you created
-    user="root",             # The default user for CockroachDB (root)
-    host="localhost",        # The host where CockroachDB is running (localhost for local machine)
-    port=26257               # The port CockroachDB is listening on (default 26257)
-)
-cursor = conn.cursor()
+def get_db_connection():
+    conn = psycopg2.connect(DATABASE_URL)
+    return conn
 
-# Create table (Run this only once)
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        name STRING,
-        email STRING
-    )
-""")
-conn.commit()
-
-# Route to get users
-@app.route("/users", methods=["GET"])
-def get_users():
-    cursor.execute("SELECT * FROM users")
+# Home route
+@app.route('/')
+def index():
+    # Connect to the database and fetch users
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM users;')
     users = cursor.fetchall()
-    return jsonify(users)
+    cursor.close()
+    conn.close()
+    
+    return render_template('index.html', users=users)
 
-# Route to add a user
-@app.route("/users", methods=["POST"])
+# Add new user
+@app.route('/add', methods=['POST'])
 def add_user():
-    data = request.json
-    cursor.execute("INSERT INTO users (name, email) VALUES (%s, %s)", (data["name"], data["email"]))
+    name = request.form['name']
+    email = request.form['email']
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO users (name, email) VALUES (%s, %s)', (name, email))
     conn.commit()
-    return jsonify({"message": "User added!"})
+    cursor.close()
+    conn.close()
+    
+    return redirect('/')
 
 # Run the app
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
-
-
-
+if __name__ == '__main__':
+    app.run(debug=True)
