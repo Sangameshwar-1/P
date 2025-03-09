@@ -1,9 +1,7 @@
-from fastapi import FastAPI, Form, Request, HTTPException
+from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from jinja2 import Environment, FileSystemLoader
-import psycopg2
-from psycopg2 import pool
+import requests
 import os
 import logging
 
@@ -13,99 +11,50 @@ app = FastAPI()
 # Enable CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://naniiiiii.netlify.app"],  # Allow only your frontend domain
+    allow_origins=["https://naniiiiii.netlify.app"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
 
-# Jinja2 template configuration
-templates = Environment(loader=FileSystemLoader("templates"))
+# GroqCloud API configuration
+GROQ_API_KEY = "ogsk_psa2HblyLOUfwHiZT7jSWGdyb3FYyRAWF4c7zcK9khCE5vRLcfTQ"  # Store API key in environment variables
+GROQ_URL = "https://api.groq.com/v1/chat/completions"
 
-# Secure database connection using environment variables
-DATABASE_URL = "postgresql://sale:X7eXTvOY6RtWchx2oCo4LA@mystic-ninja-4440.jxf.gcp-us-west2.cockroachlabs.cloud:26257/sangam?sslmode=verify-full&sslrootcert=https://cockroachlabs.cloud/clusters/e7f49c39-2968-4108-82ee-e452f0306e05/cert"
-if not DATABASE_URL:
-    raise Exception("DATABASE_URL environment variable not set!")
+if not GROQ_API_KEY:
+    raise Exception("GROQ_API_KEY environment variable not set!")
 
-# Create a database connection pool (1 to 10 connections)
-try:
-    db_pool = pool.SimpleConnectionPool(1, 10, DATABASE_URL)
-except psycopg2.Error as e:
-    raise Exception(f"Error creating database connection pool: {e}")
+# Endpoint to call GroqCloud AI
+@app.post("/ask")
+async def ask_groq(prompt: str = Form(...)):
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
+    }
 
-# Function to get a database connection
-def get_db_connection():
+    data = {
+        "model": "llama3-8b-8192",  # Example model, update as needed
+        "messages": [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.7
+    }
+
     try:
-        return db_pool.getconn()
-    except psycopg2.Error as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {e}")
+        response = requests.post(GROQ_URL, headers=headers, json=data)
+        response_json = response.json()
 
-# Function to release a database connection back to the pool
-def release_db_connection(conn):
-    db_pool.putconn(conn)
+        if response.status_code == 200:
+            return JSONResponse(content={"response": response_json["choices"][0]["message"]["content"]})
+        else:
+            raise HTTPException(status_code=response.status_code, detail=response_json)
 
-# Exception handler for general errors
-@app.exception_handler(Exception)
-async def validation_exception_handler(request: Request, exc: Exception):
-    logging.error(f"Error: {exc}")
-    return JSONResponse(
-        status_code=500,
-        content={"message": f"Internal Server Error: {exc}"}
-    )
-
-# Endpoint to check database connection
-@app.get("/check-connection")
-async def check_connection():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT 1")
-    cursor.close()
-    release_db_connection(conn)
-    return {"message": "Database connection successful!"}
-
-# Home route (Fetch users)
-@app.get("/", response_class=HTMLResponse)
-async def index():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM users;')
-    users = cursor.fetchall()
-    cursor.close()
-    release_db_connection(conn)
-
-    template = templates.get_template("index.html")
-    return HTMLResponse(content=template.render(users=users))
-
-# Add new user (POST)
-@app.post("/add")
-async def add_user(name: str = Form(...), email: str = Form(...)):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('INSERT INTO users (name, email) VALUES (%s, %s)', (name, email))
-    conn.commit()
-    cursor.close()
-    release_db_connection(conn)
-
-    return {"message": "User added successfully!", "name": name, "email": email}
-
-# View users command
-@app.get("/view-users", response_class=JSONResponse)
-async def view_users():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute('SELECT * FROM users;')
-        users = cursor.fetchall()
-    except psycopg2.Error as e:
-        logging.error(f"Database error: {e}")
-        users = []
-    finally:
-        cursor.close()
-        release_db_connection(conn)
-    
-    return JSONResponse(content={"users": users})
+    except requests.RequestException as e:
+        logging.error(f"Request failed: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 # Run the app using: uvicorn main:app --reload
