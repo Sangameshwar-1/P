@@ -29,7 +29,7 @@ if not GROQ_API_KEY:
 
 # Endpoint to call GroqCloud AI
 @app.post("/ask")
-async def ask_groq(prompt: str = Form(...)):
+async def ask(prompt: str = Form(...)):
     headers = {
         "Authorization": f"Bearer {GROQ_API_KEY}",
         "Content-Type": "application/json"
