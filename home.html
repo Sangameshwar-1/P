@@ -19,34 +19,20 @@
         header {
             background: #333;
             color: #fff;
-            padding-top: 30px;
+            padding-top: 20px;
             min-height: 70px;
             border-bottom: #77aaff 3px solid;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
         }
-        header a {
-            color: #fff;
-            text-decoration: none;
-            text-transform: uppercase;
-            font-size: 16px;
-        }
-        header ul {
-            padding: 0;
-            list-style: none;
-        }
-        header li {
-            float: left;
-            display: inline;
-            padding: 0 20px 0 20px;
-        }
-        header #branding {
-            float: left;
-        }
-        header #branding h1 {
+        header h1 {
             margin: 0;
         }
-        header nav {
-            float: right;
-            margin-top: 10px;
+        .user-info {
+            font-size: 16px;
+            color: #fff;
         }
         .main {
             padding: 20px;
@@ -55,12 +41,17 @@
         }
         .post {
             background: #e4e4e4;
-            padding: 10px;
+            padding: 15px;
             margin-bottom: 10px;
             border-radius: 5px;
+            transition: 0.3s;
+        }
+        .post:hover {
+            background: #d4d4d4;
         }
         .post h3 {
             margin: 0;
+            color: #333;
         }
         .post .meta {
             font-size: 12px;
@@ -75,30 +66,23 @@
         }
         .discussion-form button {
             display: inline-block;
-            background: #333;
+            background: #007bff;
             color: #fff;
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: 0.3s;
         }
         .discussion-form button:hover {
-            background: #555;
+            background: #0056b3;
         }
     </style>
 </head>
 <body>
     <header>
-        <div class="container">
-            <h1>Discussion Forum</h1>
-            <nav>
-                <ul>
-                    <li><a href="#">Home</a></li>
-                    <li><a href="#">Topics</a></li>
-                    <li><a href="#">New Post</a></li>
-                </ul>
-            </nav>
-        </div>
+        <h1>Discussion Forum</h1>
+        <div class="user-info" id="user-info">Not logged in</div>
     </header>
     <div class="container">
         <div class="main">
@@ -121,7 +105,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Firebase configuration
             const firebaseConfig = {
                 apiKey: "AIzaSyD23-6Ms6bd4ePn80p1sYUvV8RalfTPEcE",
                 authDomain: "test-9576c.firebaseapp.com",
@@ -132,78 +115,63 @@
                 appId: "1:200192472983:web:2a3c6b7b434068c48036d2",
                 measurementId: "G-PW6GP9SLDG"
             };
-
-            // Initialize Firebase
+            
             firebase.initializeApp(firebaseConfig);
             const database = firebase.database();
-
-            console.log("Firebase is working");
-
-            window.onload = function() {
-                getDiscussions();
-                createDiscussion();
-            }
-
-            // Get the discussion list container
-            const discussionList = document.getElementById("discussion-list");
-
-            // Get the discussions from the database and display them
+            const auth = firebase.auth();
+            
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    document.getElementById("user-info").innerText = `Logged in as: ${user.email}`;
+                } else {
+                    document.getElementById("user-info").innerText = "Not logged in";
+                }
+            });
+            
             function getDiscussions() {
                 database.ref("discussions").on("value", function(snapshot) {
-                    discussionList.innerHTML = ""; // Clear the list before adding new items
+                    const discussionList = document.getElementById("discussion-list");
+                    discussionList.innerHTML = "";
                     snapshot.forEach(function(childSnapshot) {
                         const childData = childSnapshot.val();
                         const discussionElement = document.createElement("div");
                         discussionElement.classList.add("post");
-
-                        // Create a unique ID for each discussion for later reference
-                        const discussionId = childSnapshot.key;
-
                         discussionElement.innerHTML = `
                             <h3>${childData.title}</h3>
-                            <button class="open" data-id="${discussionId}">View discussion</button>
+                            <button class="open" data-id="${childSnapshot.key}">View discussion</button>
                             <p class="meta">Posted on ${new Date(childData.timestamp).toLocaleString()}</p>
                         `;
                         discussionList.appendChild(discussionElement);
                     });
-
-                    // Add event listeners for opening discussion
                     openDiscussion();
                 });
             }
-
-            // Add a click event listener to each "View discussion" button
+            
             function openDiscussion() {
                 document.querySelectorAll(".open").forEach(button => {
                     button.addEventListener("click", function() {
                         const discussionId = this.getAttribute("data-id");
-                        const url = `discussion_page.html?id=${discussionId}`; // Pass the discussion ID in the URL
-                        window.location.href = url; // Redirect to the discussion page with the ID
+                        window.location.href = `discussion_page.html?id=${discussionId}`;
                     });
                 });
             }
-
-            function createDiscussion() {
-                // Handle form submission for creating a new discussion
-                document.querySelector('.discussion-form').addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const title = e.target.querySelector('input').value;
-                    const message = e.target.querySelector('textarea').value;
-                    const timestamp = new Date().getTime();
-                    database.ref('discussions').push({
-                        title: title,
-                        timestamp: timestamp
-                    }).then(() => {
-                        console.log("Discussion created");
-                        // Optionally, clear the form after submission
-                        e.target.reset();
-                        // Refresh the discussion list
-                        getDiscussions();
-                    }).catch((error) => {
-                        console.error("Error creating discussion: ", error);
-                    });
+            
+            document.querySelector('.discussion-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const title = e.target.querySelector('input').value;
+                const timestamp = new Date().getTime();
+                database.ref('discussions').push({
+                    title: title,
+                    timestamp: timestamp
+                }).then(() => {
+                    e.target.reset();
+                    getDiscussions();
+                }).catch((error) => {
+                    console.error("Error creating discussion: ", error);
                 });
-            }
+            });
+            
+            getDiscussions();
         });
     </script>
 </body>
