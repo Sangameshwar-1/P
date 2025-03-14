@@ -2,8 +2,9 @@
 <html>
 <head>
     <title>Login & Signup</title>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -47,6 +48,8 @@
         }
     </style>
     <script>
+               document.addEventListener("DOMContentLoaded", function () {
+
         const firebaseConfig = {
             apiKey: "AIzaSyD23-6Ms6bd4ePn80p1sYUvV8RalfTPEcE",
                 authDomain: "test-9576c.firebaseapp.com",
@@ -57,6 +60,7 @@
                 appId: "1:200192472983:web:2a3c6b7b434068c48036d2",
                 measurementId: "G-PW6GP9SLDG"
         };
+
         
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
@@ -86,7 +90,13 @@
                     alert(error.message);
                 });
         }
-    </script>
+
+        // Attach functions to global scope
+        window.signUp = signUp;
+        window.login = login;
+    });
+</script>
+
 </head>
 <body>
     <div class="container">
